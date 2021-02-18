@@ -93,6 +93,78 @@ class OptimizedBubbleSorter extends BubbleSorter {
     }
 }
 
+class SelectionSorter extends Sorter {
+    /**
+     * Returns a generator that produces the different stages of looking
+     * for a minimum number in a sublist between indices
+     * <firstIndex> and <lastIndex>. The generator stops at important
+     * assignments in the iteration.
+     *
+     * @param firstIndex  the first index
+     * @param lastIndex  the last index
+     * @returns {Generator<*, *, *>}
+     */
+    *findIndexOfMinInRange(firstIndex, lastIndex) {
+        let list = this.snapshot.list;
+        let selection = this.snapshot.selection;
+        let special = this.snapshot.special;
+
+        let i, minIndex;
+        for (i = firstIndex + 1, minIndex = firstIndex; i <= lastIndex; i++) {
+            selection.clear();
+            special.clear();
+            special.add(minIndex);
+            selection.add(i);
+            yield -1;
+
+            if (list.get(i) < list.get(minIndex)) {
+                special.clear();
+                special.add(i);
+                minIndex = i;
+                yield -1;
+            }
+        }
+
+        return minIndex;
+    }
+
+    *sort() {
+        let list = this.snapshot.list;
+        let swapped = this.snapshot.swapped;
+        let special = this.snapshot.special;
+
+        let start;
+        let length = list.length();
+        for (start = 0; start < length; start++) {
+            let minFinder = this.findIndexOfMinInRange(start, length - 1);
+
+            let next = minFinder.next();
+            while (!next.done) {
+                yield this.snapshot;
+                next = minFinder.next();
+            }
+
+            let minIndex = next.value;
+            if (minIndex !== start) {
+                swapped.add(minIndex);
+                swapped.add(start);
+                yield this.snapshot;
+
+                swap(list, start, minIndex);
+                yield this.snapshot;
+
+                swapped.clear();
+            }
+
+            special.clear();
+        }
+
+        this.snapshot.sorted = true;
+        return this.snapshot;
+    }
+}
+
+
 /**
  * A factory function that produces a sorter object.
  * @param snapshot  the object with which to create

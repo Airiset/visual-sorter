@@ -20,6 +20,7 @@ class Snapshot {
         this.list = new List();
         this.selection = new List();
         this.swapped = new List();
+        this.special = new List();
         this.sorted = false;
     }
 }

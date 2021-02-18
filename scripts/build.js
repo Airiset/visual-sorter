@@ -124,6 +124,15 @@ function drawSnapshot(canvas, snapshot, maxValue) {
                 unitHeight * snapshot.list.get(i),
                 "green"
             );
+        } else if (snapshot.special.contains(i)) {
+            drawRectangleWithColor(
+                canvas,
+                (i + 1) * unitWidth,
+                0,
+                unitWidth,
+                unitHeight * snapshot.list.get(i),
+                "yellow"
+            );
         } else if (snapshot.selection.contains(i)) {
             drawRectangleWithColor(
                 canvas,
@@ -153,11 +162,11 @@ function drawSnapshot(canvas, snapshot, maxValue) {
 let canvas = initializeCanvas();
 setCanvasSizeToWholeWindow(canvas);
 
-let maxValue = 50;
+let maxValue = 20;
 let snapshot = new Snapshot();
 snapshot.list = createScrambledRangeList(maxValue);
 
-let sorter = new OptimizedBubbleSorter(snapshot);
+let sorter = new BubbleSorter(snapshot);
 let begun = false, sort;
 
 let interval = window.setInterval(function () {
@@ -170,7 +179,6 @@ let interval = window.setInterval(function () {
         snapshot = sort.next().value;
     }
 
-    console.log(snapshot.list.elements);
     drawSnapshot(canvas, snapshot, maxValue);
 
     if (snapshot.sorted) {
