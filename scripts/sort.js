@@ -6,17 +6,17 @@
  * A sorter class.
  */
 class Sorter {
-    constructor(component) {
-        this.component = component;
+    constructor(snapshot) {
+        this.snapshot = snapshot;
     }
 
     /**
-     * Returns a sort component generator.
-     * The generator sorts the list in the component.
-     * Yields the component at each important step of the sort.
+     * Returns a sort snapshot generator.
+     * The generator sorts the list in the snapshot.
+     * Yields the snapshot at each important step of the sort.
      */
     *sort() {
-        yield component;
+        yield this.snapshot;
     }
 }
 
@@ -30,28 +30,28 @@ class BubbleSorter extends Sorter {
         while (!sorted) {
             sorted = true;
             let i;
-            for (i = 0; i < this.component.list.length() - 1; i++) {
-                this.component.selection.clear();
-                this.component.swapped.clear();
+            for (i = 0; i < this.snapshot.list.length() - 1; i++) {
+                this.snapshot.selection.clear();
+                this.snapshot.swapped.clear();
 
-                this.component.selection.add(i);
-                this.component.selection.add(i + 1);
-                yield this.component;
+                this.snapshot.selection.add(i);
+                this.snapshot.selection.add(i + 1);
+                yield this.snapshot;
 
-                if (this.component.list.get(i) > this.component.list.get(i + 1)) {
+                if (this.snapshot.list.get(i) > this.snapshot.list.get(i + 1)) {
                     sorted = false;
-                    this.component.swapped.add(i);
-                    this.component.swapped.add(i + 1);
-                    yield this.component;
+                    this.snapshot.swapped.add(i);
+                    this.snapshot.swapped.add(i + 1);
+                    yield this.snapshot;
 
-                    swap(this.component.list, i, i + 1);
-                    yield this.component;
+                    swap(this.snapshot.list, i, i + 1);
+                    yield this.snapshot;
                 }
             }
         }
 
-        this.component.sorted = true;
-        yield this.component;
+        this.snapshot.sorted = true;
+        yield this.snapshot;
     }
 }
 
@@ -62,52 +62,52 @@ class BubbleSorter extends Sorter {
 class OptimizedBubbleSorter extends BubbleSorter {
     *sort() {
         let sorted = false;
-        let last = this.component.list.length();
+        let last = this.snapshot.list.length();
 
         while (!sorted) {
             sorted = true;
             let i;
             for (i = 0; i < last - 1; i++) {
-                this.component.selection.clear();
-                this.component.swapped.clear();
+                this.snapshot.selection.clear();
+                this.snapshot.swapped.clear();
 
-                this.component.selection.add(i);
-                this.component.selection.add(i + 1);
-                yield this.component;
+                this.snapshot.selection.add(i);
+                this.snapshot.selection.add(i + 1);
+                yield this.snapshot;
 
-                if (this.component.list.get(i) > this.component.list.get(i + 1)) {
+                if (this.snapshot.list.get(i) > this.snapshot.list.get(i + 1)) {
                     sorted = false;
-                    this.component.swapped.add(i);
-                    this.component.swapped.add(i + 1);
-                    yield this.component;
+                    this.snapshot.swapped.add(i);
+                    this.snapshot.swapped.add(i + 1);
+                    yield this.snapshot;
 
-                    swap(this.component.list, i, i + 1);
-                    yield this.component;
+                    swap(this.snapshot.list, i, i + 1);
+                    yield this.snapshot;
                 }
             }
             last--;
         }
 
-        this.component.sorted = true;
-        yield this.component;
+        this.snapshot.sorted = true;
+        yield this.snapshot;
     }
 }
 
 /**
  * A factory function that produces a sorter object.
- * @param component  the object with which to create
+ * @param snapshot  the object with which to create
  *                   the sorter
  * @param sortID  the id of the sort
  * @returns {Sorter}
  */
-function createSort(component, sortID) {
+function createSort(snapshot, sortID) {
     switch (sortID) {
         case "Bubble Sort": {
-            return new BubbleSorter(component);
+            return new BubbleSorter(snapshot);
         }
 
         case "Optimized Bubble Sort": {
-            return new OptimizedBubbleSorter(component);
+            return new OptimizedBubbleSorter(snapshot);
         }
     }
 }

@@ -4,18 +4,18 @@
 
 
 /**
- * A prototype for a component.
+ * A prototype for a iteration snapshot.
  *
- * A component consists of three lists and a flag:
+ * A snapshot consists of three lists and a flag:
  *  - list: a list of elements to be sorted
  *  - selection: a list of indices that are currently
  *      selected in a sort operation
  *  - swapped: a list of indices of items that
  *      are, or will soon be, swapped.
- *  - sorted: a flag, that should that satisfies:
+ *  - sorted: a flag, that should satisfy:
  *      if true, then list must be sorted
  */
-class Component {
+class Snapshot {
     constructor() {
         this.list = new List();
         this.selection = new List();

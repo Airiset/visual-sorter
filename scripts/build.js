@@ -1,5 +1,5 @@
 /**
- * This module contains the main components and functions.
+ * This module contains the main snapshots and functions.
  */
 
 const startX = 0;
@@ -104,33 +104,33 @@ function drawNumberList(canvas, list, maxValue) {
 }
 
 /**
- * Draw a sort component.
+ * Draw a sort snapshot.
  * @param canvas  the canvas
- * @param component  the sort component
- * @param maxValue  the max value in the list in sort component
+ * @param snapshot  the sort snapshot
+ * @param maxValue  the max value in the list in sort snapshot
  */
-function drawComponent(canvas, component, maxValue) {
+function drawSnapshot(canvas, snapshot, maxValue) {
     let unitHeight = canvas.height / maxValue;
-    let unitWidth = canvas.width / (component.list.length() * 1.2);
+    let unitWidth = canvas.width / (snapshot.list.length() * 1.2);
 
     let i;
-    for (i = 0; i < component.list.length(); i++) {
-        if (component.swapped.contains(i)) {
+    for (i = 0; i < snapshot.list.length(); i++) {
+        if (snapshot.swapped.contains(i)) {
             drawRectangleWithColor(
                 canvas,
                 (i + 1) * unitWidth,
                 0,
                 unitWidth,
-                unitHeight * component.list.get(i),
+                unitHeight * snapshot.list.get(i),
                 "green"
             );
-        } else if (component.selection.contains(i)) {
+        } else if (snapshot.selection.contains(i)) {
             drawRectangleWithColor(
                 canvas,
                 (i + 1) * unitWidth,
                 0,
                 unitWidth,
-                unitHeight * component.list.get(i),
+                unitHeight * snapshot.list.get(i),
                 "red"
             );
         } else {
@@ -139,7 +139,7 @@ function drawComponent(canvas, component, maxValue) {
                 (i + 1) * unitWidth,
                 0,
                 unitWidth,
-                unitHeight * component.list.get(i),
+                unitHeight * snapshot.list.get(i),
                 "blue"
             );
         }
@@ -154,10 +154,10 @@ let canvas = initializeCanvas();
 setCanvasSizeToWholeWindow(canvas);
 
 let maxValue = 50;
-let component = new Component();
-component.list = createScrambledRangeList(maxValue);
+let snapshot = new Snapshot();
+snapshot.list = createScrambledRangeList(maxValue);
 
-let sorter = new OptimizedBubbleSorter(component);
+let sorter = new OptimizedBubbleSorter(snapshot);
 let begun = false, sort;
 
 let interval = window.setInterval(function () {
@@ -167,13 +167,13 @@ let interval = window.setInterval(function () {
         sort = sorter.sort();
         begun = true;
     } else {
-        component = sort.next().value;
+        snapshot = sort.next().value;
     }
 
-    console.log(component.list.elements);
-    drawComponent(canvas, component, maxValue);
+    console.log(snapshot.list.elements);
+    drawSnapshot(canvas, snapshot, maxValue);
 
-    if (component.sorted) {
+    if (snapshot.sorted) {
         clearInterval(interval);
     }
 }, 50);
