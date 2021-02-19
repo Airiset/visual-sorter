@@ -119,7 +119,7 @@ function drawSnapshot(canvas, snapshot, maxValue) {
             drawRectangleWithColor(
                 canvas,
                 (i + 1) * unitWidth,
-                0,
+                unitHeight * (maxValue - snapshot.list.get(i)),
                 unitWidth,
                 unitHeight * snapshot.list.get(i),
                 "green"
@@ -128,7 +128,7 @@ function drawSnapshot(canvas, snapshot, maxValue) {
             drawRectangleWithColor(
                 canvas,
                 (i + 1) * unitWidth,
-                0,
+                unitHeight * (maxValue - snapshot.list.get(i)),
                 unitWidth,
                 unitHeight * snapshot.list.get(i),
                 "yellow"
@@ -137,7 +137,7 @@ function drawSnapshot(canvas, snapshot, maxValue) {
             drawRectangleWithColor(
                 canvas,
                 (i + 1) * unitWidth,
-                0,
+                unitHeight * (maxValue - snapshot.list.get(i)),
                 unitWidth,
                 unitHeight * snapshot.list.get(i),
                 "red"
@@ -146,7 +146,7 @@ function drawSnapshot(canvas, snapshot, maxValue) {
             drawRectangleWithColor(
                 canvas,
                 (i + 1) * unitWidth,
-                0,
+                unitHeight * (maxValue - snapshot.list.get(i)),
                 unitWidth,
                 unitHeight * snapshot.list.get(i),
                 "blue"
@@ -162,11 +162,11 @@ function drawSnapshot(canvas, snapshot, maxValue) {
 let canvas = initializeCanvas();
 setCanvasSizeToWholeWindow(canvas);
 
-let maxValue = 20;
+let maxValue = 100;
 let snapshot = new Snapshot();
 snapshot.list = createScrambledRangeList(maxValue);
 
-let sorter = new BubbleSorter(snapshot);
+let sorter = new InsertionSorter(snapshot);
 let begun = false, sort;
 
 let interval = window.setInterval(function () {
