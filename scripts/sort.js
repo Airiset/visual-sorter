@@ -93,6 +93,9 @@ class OptimizedBubbleSorter extends BubbleSorter {
     }
 }
 
+/**
+ * A sorter class that implements the Selection Sort algorithm.
+ */
 class SelectionSorter extends Sorter {
     /**
      * Returns a generator that produces the different stages of looking
@@ -157,6 +160,47 @@ class SelectionSorter extends Sorter {
             }
 
             special.clear();
+        }
+
+        this.snapshot.sorted = true;
+        return this.snapshot;
+    }
+}
+
+/**
+ * A sorter class that implements the Insertion Sort algorithm.
+ */
+class InsertionSorter extends Sorter {
+    *sort() {
+        let list = this.snapshot.list;
+        let selection = this.snapshot.selection;
+        let swapped = this.snapshot.swapped;
+        let special = this.snapshot.special;
+
+        let i;
+        for (i = 0; i < list.length(); i++) {
+            special.clear();
+            special.add(i);
+            yield this.snapshot;
+
+            let curr = i;
+            while (curr > 0 && list.get(curr) < list.get(curr - 1)) {
+                selection.clear();
+                selection.add(curr);
+                selection.add(curr - 1);
+                yield this.snapshot;
+
+                selection.clear();
+                swapped.add(curr);
+                swapped.add(curr - 1);
+                yield this.snapshot;
+
+                swap(list, curr, curr - 1);
+                yield this.snapshot;
+
+                swapped.clear();
+                curr--;
+            }
         }
 
         this.snapshot.sorted = true;
