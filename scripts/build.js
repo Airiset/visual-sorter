@@ -5,12 +5,18 @@
 const startX = 0;
 const startY = 0;
 
+let currentAnimationInterval;
+
 /**
  * Returns the canvas element.
  * @returns {HTMLElement}
  */
 function initializeCanvas() {
     return document.getElementById("canvas");
+}
+
+function initializeStartSortingButton() {
+    return document.getElementById("big-sort-button");
 }
 
 /**
@@ -30,6 +36,17 @@ function setCanvasSizeToWholeWindow(canvas) {
 function setCanvasSizeToScaledWindow(canvas, scaleFactor) {
     canvas.width = (window.innerWidth * scaleFactor);
     canvas.height = (window.innerHeight * scaleFactor);
+}
+
+/*
+https://stackoverflow.com/questions/10214873/make-canvas-as-wide-and-as-high-as-parent
+ */
+
+function setCanvasSizeToContainer(canvas) {
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
 }
 
 /**
@@ -155,34 +172,46 @@ function drawSnapshot(canvas, snapshot, maxValue) {
     }
 }
 
+function beginSort() {
+    let maxValue = 50;
+    let snapshot = new Snapshot();
+    snapshot.list = createScrambledRangeList(maxValue);
+
+    let sorter = new SelectionSorter(snapshot);
+    let begun = false, sort;
+
+    currentAnimationInterval = window.setInterval(function () {
+        clear(canvas);
+
+        if (!begun) {
+            sort = sorter.sort();
+            begun = true;
+        } else {
+            snapshot = sort.next().value;
+        }
+
+        drawSnapshot(canvas, snapshot, maxValue);
+
+        if (snapshot.sorted) {
+            clearInterval(interval);
+        }
+    }, 100);
+}
+
 /*
  MAIN:
  */
 
 let canvas = initializeCanvas();
-setCanvasSizeToWholeWindow(canvas);
+let startButton = initializeStartSortingButton();
 
-let maxValue = 100;
-let snapshot = new Snapshot();
-snapshot.list = createScrambledRangeList(maxValue);
 
-let sorter = new InsertionSorter(snapshot);
-let begun = false, sort;
+setCanvasSizeToContainer(canvas);
 
-let interval = window.setInterval(function () {
-    clear(canvas);
+startButton.onclick = function () {
+    clearInterval(currentAnimationInterval);
+    beginSort();
+}
 
-    if (!begun) {
-        sort = sorter.sort();
-        begun = true;
-    } else {
-        snapshot = sort.next().value;
-    }
 
-    drawSnapshot(canvas, snapshot, maxValue);
-
-    if (snapshot.sorted) {
-        clearInterval(interval);
-    }
-}, 50);
 

@@ -3,3 +3,76 @@ body {
     height: 100%;
     overflow: hidden;
 }
+
+#canvas-container {
+    width: 70%;
+    height: 100vh;
+
+    position: relative;
+    float: left;
+}
+
+#menu-container {
+    width: 30%;
+    height: 100vh;
+    background-color: white;
+    float: left;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#big-sort-button {
+    width: 65%;
+    height: 100%;
+    border-radius: 30px;
+    border-style: none;
+
+    color: white;
+    background-color: orange;
+
+    font-size: 32pt;
+    font-weight: bold;
+    font-family: Arial, serif;
+
+    outline: none;
+}
+
+#big-sort-button:hover {
+    width: 65%;
+    height: 100%;
+    border-radius: 30px;
+    border-style: double;
+    border-color: orange;
+    border-width: thick;
+
+    color: orange;
+    background-color: white;
+
+    font-size: 32pt;
+    font-weight: bold;
+    font-family: Arial, serif;
+
+    outline: none;
+}
+
+#big-sort-button:active {
+    width: 65%;
+    height: 100%;
+    border-radius: 30px;
+    border-style: none;
+
+    color: white;
+    background-color: orange;
+
+    font-size: 32pt;
+    font-weight: bold;
+    font-family: Arial, serif;
+
+    outline: none;
+}
+
+.menu-stack {
+    display: block;
+    height: 10%;
+}
