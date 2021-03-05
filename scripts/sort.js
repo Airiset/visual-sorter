@@ -227,3 +227,7 @@ function createSort(snapshot, sortID) {
         }
     }
 }
+
+function getAlgorithmNames() {
+    return ["Selection Sort", "Bubble Sort", "Insertion Sort"];
+}
