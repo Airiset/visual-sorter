@@ -128,7 +128,7 @@ function drawNumberList(canvas, list, maxValue) {
  */
 function drawSnapshot(canvas, snapshot, maxValue) {
     let unitHeight = canvas.height / maxValue;
-    let unitWidth = canvas.width / (snapshot.list.length() * 1.2);
+    let unitWidth = canvas.width / snapshot.list.length();
 
     let i;
     for (i = 0; i < snapshot.list.length(); i++) {
@@ -172,13 +172,9 @@ function drawSnapshot(canvas, snapshot, maxValue) {
     }
 }
 
-function beginSort() {
-    let maxValue = 50;
-    let snapshot = new Snapshot();
-    snapshot.list = createScrambledRangeList(maxValue);
-
-    let sorter = new SelectionSorter(snapshot);
+function beginSort(sorter, maxValue) {
     let begun = false, sort;
+    let snapshot = sorter.snapshot;
 
     currentAnimationInterval = window.setInterval(function () {
         clear(canvas);
@@ -193,9 +189,9 @@ function beginSort() {
         drawSnapshot(canvas, snapshot, maxValue);
 
         if (snapshot.sorted) {
-            clearInterval(interval);
+            clearInterval(currentAnimationInterval);
         }
-    }, 100);
+    }, 10);
 }
 
 /*
@@ -209,9 +205,13 @@ let startButton = initializeStartSortingButton();
 setCanvasSizeToContainer(canvas);
 
 startButton.onclick = function () {
+    let maxValue = 50;
+    let snapshot = new Snapshot();
+    snapshot.list = createScrambledRangeList(maxValue);
+    let sortName = getSelectedAlgorithmName();
+
+    let sorter = createSort(snapshot, sortName);
+
     clearInterval(currentAnimationInterval);
-    beginSort();
+    beginSort(sorter, maxValue);
 }
-
-
-
