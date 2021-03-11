@@ -222,8 +222,12 @@ function createSort(snapshot, sortID) {
             return new BubbleSorter(snapshot);
         }
 
-        case "Optimized Bubble Sort": {
-            return new OptimizedBubbleSorter(snapshot);
+        case "Selection Sort": {
+            return new SelectionSorter(snapshot);
+        }
+
+        case "Insertion Sort": {
+            return new InsertionSorter(snapshot);
         }
     }
 }
