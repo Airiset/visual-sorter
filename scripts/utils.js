@@ -16,8 +16,8 @@
  *      if true, then list must be sorted
  */
 class Snapshot {
-    constructor() {
-        this.list = new List();
+    constructor(list) {
+        this.list = list;
         this.selection = new List();
         this.swapped = new List();
         this.special = new List();

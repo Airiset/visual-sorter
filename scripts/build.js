@@ -38,10 +38,6 @@ function setCanvasSizeToScaledWindow(canvas, scaleFactor) {
     canvas.height = (window.innerHeight * scaleFactor);
 }
 
-/*
-https://stackoverflow.com/questions/10214873/make-canvas-as-wide-and-as-high-as-parent
- */
-
 function setCanvasSizeToContainer(canvas) {
     canvas.style.width = '100%';
     canvas.style.height = '100%';
@@ -127,48 +123,28 @@ function drawNumberList(canvas, list, maxValue) {
  * @param maxValue  the max value in the list in sort snapshot
  */
 function drawSnapshot(canvas, snapshot, maxValue) {
-    let unitHeight = canvas.height / maxValue;
+    let unitHeight = canvas.height / maxValue
     let unitWidth = canvas.width / snapshot.list.length();
 
     let i;
     for (i = 0; i < snapshot.list.length(); i++) {
+        let color = "white";
         if (snapshot.swapped.contains(i)) {
-            drawRectangleWithColor(
-                canvas,
-                (i + 1) * unitWidth,
-                unitHeight * (maxValue - snapshot.list.get(i)),
-                unitWidth,
-                unitHeight * snapshot.list.get(i),
-                "green"
-            );
+            color = "green";
         } else if (snapshot.special.contains(i)) {
-            drawRectangleWithColor(
-                canvas,
-                (i + 1) * unitWidth,
-                unitHeight * (maxValue - snapshot.list.get(i)),
-                unitWidth,
-                unitHeight * snapshot.list.get(i),
-                "yellow"
-            );
+            color = "yellow";
         } else if (snapshot.selection.contains(i)) {
-            drawRectangleWithColor(
-                canvas,
-                (i + 1) * unitWidth,
-                unitHeight * (maxValue - snapshot.list.get(i)),
-                unitWidth,
-                unitHeight * snapshot.list.get(i),
-                "red"
-            );
+            color = "red";
         } else {
-            drawRectangleWithColor(
-                canvas,
-                (i + 1) * unitWidth,
-                unitHeight * (maxValue - snapshot.list.get(i)),
-                unitWidth,
-                unitHeight * snapshot.list.get(i),
-                "blue"
-            );
+            color = "blue";
         }
+
+        let xPosition = i * unitWidth;
+        let yPosition = unitHeight * (maxValue - snapshot.list.get(i));
+        let height = unitHeight * snapshot.list.get(i);
+        let width = unitWidth;
+
+        drawRectangleWithColor(canvas, xPosition, yPosition, width, height, color);
     }
 }
 
@@ -206,11 +182,10 @@ setCanvasSizeToContainer(canvas);
 
 startButton.onclick = function () {
     let maxValue = 50;
-    let snapshot = new Snapshot();
-    snapshot.list = createScrambledRangeList(maxValue);
+    let list = createScrambledRangeList(maxValue);
     let sortName = getSelectedAlgorithmName();
 
-    let sorter = createSort(snapshot, sortName);
+    let sorter = createSort(list, sortName);
 
     clearInterval(currentAnimationInterval);
     beginSort(sorter, maxValue);

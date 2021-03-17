@@ -6,8 +6,8 @@
  * A sorter class.
  */
 class Sorter {
-    constructor(snapshot) {
-        this.snapshot = snapshot;
+    constructor(list) {
+        this.snapshot = new Snapshot(list);
     }
 
     /**
@@ -208,30 +208,30 @@ class InsertionSorter extends Sorter {
     }
 }
 
+let sorterAlgorithms = {
+    "Bubble Sort": BubbleSorter,
+    "Optimized Bubble Sort": OptimizedBubbleSorter,
+    "Insertion Sort": InsertionSorter,
+    "Selection Sort": SelectionSorter
+}
 
 /**
- * A factory function that produces a sorter object.
- * @param snapshot  the object with which to create
- *                   the sorter
+ * Returns a sorter object for the given list that matches
+ * the ID sortID.
+ *
+ * @param list  the list to be sorted by the sorter algorithm
  * @param sortID  the id of the sort
  * @returns {Sorter}
  */
-function createSort(snapshot, sortID) {
-    switch (sortID) {
-        case "Bubble Sort": {
-            return new BubbleSorter(snapshot);
-        }
-
-        case "Selection Sort": {
-            return new SelectionSorter(snapshot);
-        }
-
-        case "Insertion Sort": {
-            return new InsertionSorter(snapshot);
-        }
-    }
+function createSort(list, sortID) {
+    let Sorter = sorterAlgorithms[sortID];
+    return new Sorter(list);
 }
 
+/**
+ * Returns all allowed sorting algorithms name IDs.
+ * @returns {string[]}
+ */
 function getAlgorithmNames() {
-    return ["Selection Sort", "Bubble Sort", "Insertion Sort"];
+    return Object.keys(sorterAlgorithms);
 }
