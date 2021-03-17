@@ -1,9 +1,11 @@
 /**
- * This module contains the main components and functions.
+ * This module contains the main snapshots and functions.
  */
 
 const startX = 0;
 const startY = 0;
+
+let currentAnimationInterval;
 
 /**
  * Returns the canvas element.
@@ -11,6 +13,10 @@ const startY = 0;
  */
 function initializeCanvas() {
     return document.getElementById("canvas");
+}
+
+function initializeStartSortingButton() {
+    return document.getElementById("big-sort-button");
 }
 
 /**
@@ -30,6 +36,13 @@ function setCanvasSizeToWholeWindow(canvas) {
 function setCanvasSizeToScaledWindow(canvas, scaleFactor) {
     canvas.width = (window.innerWidth * scaleFactor);
     canvas.height = (window.innerHeight * scaleFactor);
+}
+
+function setCanvasSizeToContainer(canvas) {
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
 }
 
 /**
@@ -104,46 +117,57 @@ function drawNumberList(canvas, list, maxValue) {
 }
 
 /**
- * Draw a sort component.
+ * Draw a sort snapshot.
  * @param canvas  the canvas
- * @param component  the sort component
- * @param maxValue  the max value in the list in sort component
+ * @param snapshot  the sort snapshot
+ * @param maxValue  the max value in the list in sort snapshot
  */
-function drawComponent(canvas, component, maxValue) {
-    let unitHeight = canvas.height / maxValue;
-    let unitWidth = canvas.width / (component.list.length() * 1.2);
+function drawSnapshot(canvas, snapshot, maxValue) {
+    let unitHeight = canvas.height / maxValue
+    let unitWidth = canvas.width / snapshot.list.length();
 
     let i;
-    for (i = 0; i < component.list.length(); i++) {
-        if (component.swapped.contains(i)) {
-            drawRectangleWithColor(
-                canvas,
-                (i + 1) * unitWidth,
-                0,
-                unitWidth,
-                unitHeight * component.list.get(i),
-                "green"
-            );
-        } else if (component.selection.contains(i)) {
-            drawRectangleWithColor(
-                canvas,
-                (i + 1) * unitWidth,
-                0,
-                unitWidth,
-                unitHeight * component.list.get(i),
-                "red"
-            );
+    for (i = 0; i < snapshot.list.length(); i++) {
+        let color = "white";
+        if (snapshot.swapped.contains(i)) {
+            color = "green";
+        } else if (snapshot.special.contains(i)) {
+            color = "yellow";
+        } else if (snapshot.selection.contains(i)) {
+            color = "red";
         } else {
-            drawRectangleWithColor(
-                canvas,
-                (i + 1) * unitWidth,
-                0,
-                unitWidth,
-                unitHeight * component.list.get(i),
-                "blue"
-            );
+            color = "blue";
         }
+
+        let xPosition = i * unitWidth;
+        let yPosition = unitHeight * (maxValue - snapshot.list.get(i));
+        let height = unitHeight * snapshot.list.get(i);
+        let width = unitWidth;
+
+        drawRectangleWithColor(canvas, xPosition, yPosition, width, height, color);
     }
+}
+
+function beginSort(sorter, maxValue) {
+    let begun = false, sort;
+    let snapshot = sorter.snapshot;
+
+    currentAnimationInterval = window.setInterval(function () {
+        clear(canvas);
+
+        if (!begun) {
+            sort = sorter.sort();
+            begun = true;
+        } else {
+            snapshot = sort.next().value;
+        }
+
+        drawSnapshot(canvas, snapshot, maxValue);
+
+        if (snapshot.sorted) {
+            clearInterval(currentAnimationInterval);
+        }
+    }, 10);
 }
 
 /*
@@ -151,30 +175,18 @@ function drawComponent(canvas, component, maxValue) {
  */
 
 let canvas = initializeCanvas();
-setCanvasSizeToWholeWindow(canvas);
+let startButton = initializeStartSortingButton();
 
-let maxValue = 50;
-let component = new Component();
-component.list = createScrambledRangeList(maxValue);
 
-let sorter = new OptimizedBubbleSorter(component);
-let begun = false, sort;
+setCanvasSizeToContainer(canvas);
 
-let interval = window.setInterval(function () {
-    clear(canvas);
+startButton.onclick = function () {
+    let maxValue = 50;
+    let list = createScrambledRangeList(maxValue);
+    let sortName = getSelectedAlgorithmName();
 
-    if (!begun) {
-        sort = sorter.sort();
-        begun = true;
-    } else {
-        component = sort.next().value;
-    }
+    let sorter = createSort(list, sortName);
 
-    console.log(component.list.elements);
-    drawComponent(canvas, component, maxValue);
-
-    if (component.sorted) {
-        clearInterval(interval);
-    }
-}, 50);
-
+    clearInterval(currentAnimationInterval);
+    beginSort(sorter, maxValue);
+}

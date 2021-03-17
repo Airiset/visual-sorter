@@ -6,17 +6,17 @@
  * A sorter class.
  */
 class Sorter {
-    constructor(component) {
-        this.component = component;
+    constructor(list) {
+        this.snapshot = new Snapshot(list);
     }
 
     /**
-     * Returns a sort component generator.
-     * The generator sorts the list in the component.
-     * Yields the component at each important step of the sort.
+     * Returns a sort snapshot generator.
+     * The generator sorts the list in the snapshot.
+     * Yields the snapshot at each important step of the sort.
      */
     *sort() {
-        yield component;
+        yield this.snapshot;
     }
 }
 
@@ -30,28 +30,28 @@ class BubbleSorter extends Sorter {
         while (!sorted) {
             sorted = true;
             let i;
-            for (i = 0; i < this.component.list.length() - 1; i++) {
-                this.component.selection.clear();
-                this.component.swapped.clear();
+            for (i = 0; i < this.snapshot.list.length() - 1; i++) {
+                this.snapshot.selection.clear();
+                this.snapshot.swapped.clear();
 
-                this.component.selection.add(i);
-                this.component.selection.add(i + 1);
-                yield this.component;
+                this.snapshot.selection.add(i);
+                this.snapshot.selection.add(i + 1);
+                yield this.snapshot;
 
-                if (this.component.list.get(i) > this.component.list.get(i + 1)) {
+                if (this.snapshot.list.get(i) > this.snapshot.list.get(i + 1)) {
                     sorted = false;
-                    this.component.swapped.add(i);
-                    this.component.swapped.add(i + 1);
-                    yield this.component;
+                    this.snapshot.swapped.add(i);
+                    this.snapshot.swapped.add(i + 1);
+                    yield this.snapshot;
 
-                    swap(this.component.list, i, i + 1);
-                    yield this.component;
+                    swap(this.snapshot.list, i, i + 1);
+                    yield this.snapshot;
                 }
             }
         }
 
-        this.component.sorted = true;
-        yield this.component;
+        this.snapshot.sorted = true;
+        yield this.snapshot;
     }
 }
 
@@ -62,52 +62,176 @@ class BubbleSorter extends Sorter {
 class OptimizedBubbleSorter extends BubbleSorter {
     *sort() {
         let sorted = false;
-        let last = this.component.list.length();
+        let last = this.snapshot.list.length();
 
         while (!sorted) {
             sorted = true;
             let i;
             for (i = 0; i < last - 1; i++) {
-                this.component.selection.clear();
-                this.component.swapped.clear();
+                this.snapshot.selection.clear();
+                this.snapshot.swapped.clear();
 
-                this.component.selection.add(i);
-                this.component.selection.add(i + 1);
-                yield this.component;
+                this.snapshot.selection.add(i);
+                this.snapshot.selection.add(i + 1);
+                yield this.snapshot;
 
-                if (this.component.list.get(i) > this.component.list.get(i + 1)) {
+                if (this.snapshot.list.get(i) > this.snapshot.list.get(i + 1)) {
                     sorted = false;
-                    this.component.swapped.add(i);
-                    this.component.swapped.add(i + 1);
-                    yield this.component;
+                    this.snapshot.swapped.add(i);
+                    this.snapshot.swapped.add(i + 1);
+                    yield this.snapshot;
 
-                    swap(this.component.list, i, i + 1);
-                    yield this.component;
+                    swap(this.snapshot.list, i, i + 1);
+                    yield this.snapshot;
                 }
             }
             last--;
         }
 
-        this.component.sorted = true;
-        yield this.component;
+        this.snapshot.sorted = true;
+        yield this.snapshot;
     }
 }
 
 /**
- * A factory function that produces a sorter object.
- * @param component  the object with which to create
- *                   the sorter
+ * A sorter class that implements the Selection Sort algorithm.
+ */
+class SelectionSorter extends Sorter {
+    /**
+     * Returns a generator that produces the different stages of looking
+     * for a minimum number in a sublist between indices
+     * <firstIndex> and <lastIndex>. The generator stops at important
+     * assignments in the iteration.
+     *
+     * @param firstIndex  the first index
+     * @param lastIndex  the last index
+     * @returns {Generator<*, *, *>}
+     */
+    *findIndexOfMinInRange(firstIndex, lastIndex) {
+        let list = this.snapshot.list;
+        let selection = this.snapshot.selection;
+        let special = this.snapshot.special;
+
+        let i, minIndex;
+        for (i = firstIndex + 1, minIndex = firstIndex; i <= lastIndex; i++) {
+            selection.clear();
+            special.clear();
+            special.add(minIndex);
+            selection.add(i);
+            yield -1;
+
+            if (list.get(i) < list.get(minIndex)) {
+                special.clear();
+                special.add(i);
+                minIndex = i;
+                yield -1;
+            }
+        }
+
+        return minIndex;
+    }
+
+    *sort() {
+        let list = this.snapshot.list;
+        let swapped = this.snapshot.swapped;
+        let special = this.snapshot.special;
+
+        let start;
+        let length = list.length();
+        for (start = 0; start < length; start++) {
+            let minFinder = this.findIndexOfMinInRange(start, length - 1);
+
+            let next = minFinder.next();
+            while (!next.done) {
+                yield this.snapshot;
+                next = minFinder.next();
+            }
+
+            let minIndex = next.value;
+            if (minIndex !== start) {
+                swapped.add(minIndex);
+                swapped.add(start);
+                yield this.snapshot;
+
+                swap(list, start, minIndex);
+                yield this.snapshot;
+
+                swapped.clear();
+            }
+
+            special.clear();
+        }
+
+        this.snapshot.sorted = true;
+        return this.snapshot;
+    }
+}
+
+/**
+ * A sorter class that implements the Insertion Sort algorithm.
+ */
+class InsertionSorter extends Sorter {
+    *sort() {
+        let list = this.snapshot.list;
+        let selection = this.snapshot.selection;
+        let swapped = this.snapshot.swapped;
+        let special = this.snapshot.special;
+
+        let i;
+        for (i = 0; i < list.length(); i++) {
+            special.clear();
+            special.add(i);
+            yield this.snapshot;
+
+            let curr = i;
+            while (curr > 0 && list.get(curr) < list.get(curr - 1)) {
+                selection.clear();
+                selection.add(curr);
+                selection.add(curr - 1);
+                yield this.snapshot;
+
+                selection.clear();
+                swapped.add(curr);
+                swapped.add(curr - 1);
+                yield this.snapshot;
+
+                swap(list, curr, curr - 1);
+                yield this.snapshot;
+
+                swapped.clear();
+                curr--;
+            }
+        }
+
+        this.snapshot.sorted = true;
+        return this.snapshot;
+    }
+}
+
+let sorterAlgorithms = {
+    "Bubble Sort": BubbleSorter,
+    "Optimized Bubble Sort": OptimizedBubbleSorter,
+    "Insertion Sort": InsertionSorter,
+    "Selection Sort": SelectionSorter
+}
+
+/**
+ * Returns a sorter object for the given list that matches
+ * the ID sortID.
+ *
+ * @param list  the list to be sorted by the sorter algorithm
  * @param sortID  the id of the sort
  * @returns {Sorter}
  */
-function createSort(component, sortID) {
-    switch (sortID) {
-        case "Bubble Sort": {
-            return new BubbleSorter(component);
-        }
+function createSort(list, sortID) {
+    let Sorter = sorterAlgorithms[sortID];
+    return new Sorter(list);
+}
 
-        case "Optimized Bubble Sort": {
-            return new OptimizedBubbleSorter(component);
-        }
-    }
+/**
+ * Returns all allowed sorting algorithms name IDs.
+ * @returns {string[]}
+ */
+function getAlgorithmNames() {
+    return Object.keys(sorterAlgorithms);
 }

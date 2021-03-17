@@ -4,22 +4,23 @@
 
 
 /**
- * A prototype for a component.
+ * A prototype for a iteration snapshot.
  *
- * A component consists of three lists and a flag:
+ * A snapshot consists of three lists and a flag:
  *  - list: a list of elements to be sorted
  *  - selection: a list of indices that are currently
  *      selected in a sort operation
  *  - swapped: a list of indices of items that
  *      are, or will soon be, swapped.
- *  - sorted: a flag, that should that satisfies:
+ *  - sorted: a flag, that should satisfy:
  *      if true, then list must be sorted
  */
-class Component {
-    constructor() {
-        this.list = new List();
+class Snapshot {
+    constructor(list) {
+        this.list = list;
         this.selection = new List();
         this.swapped = new List();
+        this.special = new List();
         this.sorted = false;
     }
 }
@@ -136,7 +137,7 @@ function createRangeList(length) {
  */
 function createScrambledRangeList(length) {
     let list = createRangeList(length);
-    let randomTimes = Math.round((Math.random() * 1000));
+    let randomTimes = length * Math.log2(length);
 
     let i;
     for (i = 0; i < randomTimes; i++) {
@@ -172,4 +173,131 @@ function randomSwap(list) {
     console.log(list.elements);
     swap(list, indexI, indexJ);
     console.log(list.elements);
+}
+
+/**
+ * A prototype for a two pointer Node
+ */
+class Node {
+    constructor(value) {
+        this.value = value;
+        this.nextNode = null;
+    }
+}
+
+/**
+ * A prototype for a LinkedList.
+ */
+class LinkedList extends List {
+    constructor() {
+        super();
+        this.first = null;
+        this.last = null;
+    }
+
+    add(element) {
+        let newNode = new Node(element);
+
+        if (this.first == null) {
+            this.first = new Node(element);
+            this.first.nextNode = this.first;
+            this.last = this.first;
+        } else {
+            this.last.nextNode = newNode;
+            newNode.nextNode = this.first;
+            this.last = newNode;
+        }
+    }
+
+    get(index) {
+        let curr = this.first;
+
+        let i = 0;
+        while (i < index && curr != null) {
+            curr = curr.nextNode;
+            i++;
+        }
+
+        if (curr == null) {
+            return null;
+        } else {
+            return curr.value;
+        }
+    }
+
+    set(element, index) {
+        let curr = this.first;
+
+        let i = 0;
+        while (i < index && curr != null) {
+            curr = curr.nextNode;
+            i++;
+        }
+
+        if (curr != null) {
+            curr.value = element;
+        }
+    }
+
+    contains(element) {
+        let curr = this.first;
+
+        while (curr != null && curr.value !== element) {
+            curr = curr.nextNode;
+        }
+
+        return curr != null;
+    }
+
+    clear() {
+        this.first = null;
+        this.last = null;
+    }
+
+    length() {
+        let curr = this.first;
+
+        let i = 0;
+        while (curr != null) {
+            curr = curr.nextNode;
+            i++;
+        }
+
+        return i;
+    }
+}
+
+/**
+ * A prototype for a Queue.
+ */
+class Queue {
+    constructor() {
+        this.list = new LinkedList();
+    }
+
+    /**
+     * Returns True iff the stack is empty.
+     * @returns {boolean}
+     */
+    isEmpty() {
+        return this.list.length() === 0;
+    }
+
+    /**
+     * Adds a new item to the end of the queue.
+     * @param item  the item to be added
+     */
+    enqueue(item) {
+        this.list.add(item);
+    }
+
+    /**
+     * Returns the value at the beginning of the queue.
+     */
+    dequeue() {
+        let value = this.list.first.value;
+        this.list.last.nextNode = this.list.first.nextNode;
+        this.list.first = this.list.first.nextNode;
+        return value;
+    }
 }
