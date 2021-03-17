@@ -72,6 +72,12 @@ body {
     outline: none;
 }
 
+#app-header-title {
+    font-size: 32pt;
+    font-family:  Calibri, sans-serif;
+    color: orange;
+}
+
 .menu-stack {
     display: block;
     height: 10%;
