@@ -1,6 +1,6 @@
 /**
  * This module ensures that browser-specific functionality is
- * included.
+ * supported.
  */
 
 requestAnimationFrame = window.requestAnimationFrame
