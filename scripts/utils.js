@@ -23,6 +23,12 @@ class Snapshot {
         this.special = new List();
         this.sorted = false;
     }
+
+    select(from, to) {
+        for (let i = from; i <= to; i++) {
+            this.selection.add(i);
+        }
+    }
 }
 
 /**

@@ -208,11 +208,254 @@ class InsertionSorter extends Sorter {
     }
 }
 
+/**
+ * A sorter class that implements the glorius Merge Sort algorithm.
+ */
+class MergeSorter extends Sorter {
+    /*
+    Implementing MergeSort on this design is quite difficult... Actually
+    it is not. I could simply hide all the extra space creation and the
+    recursion from the viewer...
+
+    However, I am not satisfied with that. This is the VISUAL SORTER
+    after all. I want the viewer to visualize the sort in all of its
+    glory!! The splitting, the merging, the RECURSION. But how??!!!!!!!!
+
+    yield * will be our silver bullet. By calling yield * on some other
+    generator, we delegate the work to that generator, so we can recursively
+    call a sort function on a smaller list with yield * and delegate the
+    return of snapshots to that child generator, until its done.
+     */
+    constructor(list) {
+        super(list);
+        this.isChild = false;
+    }
+
+    /**
+     * Generates snapshots for the given lists and their merging onto
+     * the resulting merged list. Returns a list composed of merging
+     * listA and listB in order.
+     *
+     * @param listA  the first list to be merged
+     * @param listB  the second list to be merged
+     */
+    *merge(listA, listB) {
+        let snapshotA = new Snapshot(listA);
+        let snapshotB = new Snapshot(listB);
+
+        let mergedList = new List();
+        let mergedSnapshot = new Snapshot(mergedList);
+
+        let indexA = 0, indexB = 0;
+        while (listA.length() - indexA > 0 && listB.length() - indexB > 0) {
+            snapshotA.selection.clear();
+            snapshotB.selection.clear();
+            snapshotA.selection.add(indexA);
+            snapshotB.selection.add(indexB);
+            yield [snapshotA, snapshotB, mergedSnapshot];
+
+            if (listA.get(indexA) <= listB.get(indexB)) {
+                mergedList.add(listA.get(indexA));
+                indexA++;
+            } else {
+                mergedList.add(listB.get(indexB));
+                indexB++;
+            }
+        }
+
+        snapshotA.selection.clear();
+        snapshotB.selection.clear();
+
+        let remainingList, index, snapshot;
+        if (listA.length() - indexA > 0) {
+            remainingList = listA;
+            index = indexA;
+            snapshot = snapshotA;
+        } else {
+            remainingList = listB;
+            index = indexB;
+            snapshot = snapshotB
+        }
+
+        while (remainingList.length() - index > 0) {
+            snapshot.selection.clear();
+            snapshot.selection.add(index);
+            yield [snapshotA, snapshotB, mergedSnapshot];
+
+            mergedList.add(remainingList.get(index));
+            index++;
+        }
+
+        snapshot.selection.clear();
+        snapshot.selection.add(index);
+        yield [snapshotA, snapshotB, mergedSnapshot];
+
+        return mergedSnapshot;
+    }
+
+    /**
+     * Splits the given list into two halves.
+     * @param list  the list to be split
+     */
+    split(list) {
+        let firstHalf = new List();
+        let secondHalf = new List();
+        let middle = Math.floor(list.length() / 2);
+
+        for (let i = 0; i < list.length(); i++) {
+            if (i < middle) {
+                firstHalf.add(list.get(i));
+            } else {
+                secondHalf.add(list.get(i));
+            }
+        }
+
+        return [firstHalf, secondHalf];
+    }
+
+    *sort() {
+        let list = this.snapshot.list;
+
+        if (list.length() === 1) {
+            return this.snapshot;
+        } else {
+            let halves = this.split(list);
+
+            let firstSorter = new MergeSorter(halves[0]);
+            let secondSorter = new MergeSorter(halves[1]);
+            firstSorter.isChild = true;
+            secondSorter.isChild = true;
+
+            let firstSnapshot = yield * firstSorter.sort();
+            let secondSnapshot = yield * secondSorter.sort();
+
+            let finalSnapshot = yield * this.merge(firstSnapshot.list, secondSnapshot.list);
+
+            if (!this.isChild) {
+                finalSnapshot.sorted = true;
+                yield finalSnapshot;
+            } else {
+                return finalSnapshot;
+            }
+        }
+    }
+}
+
+/**
+ * A sorter class that implements the Merge Sort algorithm, without
+ * the
+ */
+class SimplifiedMergeSorter extends MergeSorter {
+    /**
+     * Merges the sublist contained between ranges firstIndexA
+     * and secondIndexA and sublist contained in the range firstIndexB
+     * and secondIndexB. Returns the resulting list
+     *
+     * @param firstIndexA  the first index for the range of the first list
+     * @param secondIndexA  the last index for the range of the first list
+     * @param firstIndexB  the first index for the range of the second list
+     * @param secondIndexB  the last index for the range of the second lst
+     */
+    merge(firstIndexA, secondIndexA, firstIndexB, secondIndexB) {
+        let mergedList = new List();
+        let list = this.snapshot.list;
+
+        let indexA = firstIndexA, indexB = firstIndexB;
+        while (secondIndexA - indexA >= 0 && secondIndexB - indexB >= 0) {
+            if (list.get(indexA) <= list.get(indexB)) {
+                mergedList.add(list.get(indexA));
+                indexA++;
+            } else {
+                mergedList.add(list.get(indexB));
+                indexB++;
+            }
+        }
+
+        let remainingList, index, finalIndex;
+        if (secondIndexA - indexA >= 0) {
+            remainingList = list;
+            index = indexA;
+            finalIndex = secondIndexA;
+        } else {
+            remainingList = list;
+            index = indexB;
+            finalIndex = secondIndexB;
+        }
+
+        while (finalIndex - index >= 0) {
+            mergedList.add(remainingList.get(index));
+            index++;
+        }
+
+        return mergedList;
+    }
+
+    /**
+     * Returns an array of indices. The first two values (at indices 0-1)
+     * contain the range for the first half of the range and the last two
+     * values represent the range for the last half of the range.
+     *
+     * @param firstIndex  the first index for the range of the sublist
+     * @param secondIndex  the last index for the range of the sublist
+     * @returns {(*)[]}
+     */
+    split(firstIndex, secondIndex) {
+        let half = (secondIndex - firstIndex) / 2;
+        return [firstIndex,
+            firstIndex + Math.floor(half),
+            firstIndex + Math.floor(half) + 1,
+            secondIndex];
+    }
+
+    /**
+     * Returns a generator that produces snapshots of a sorting sequence.
+     * Sorts a sublist over a range using the Merge Sort algorithm.
+     * @param firstIndex  the first index over the range
+     * @param lastIndex  the last index over the range
+     */
+    *mergeSort(firstIndex, lastIndex) {
+        let list = this.snapshot.list;
+
+        if (lastIndex - firstIndex === 0) {
+            this.snapshot.selection.add(firstIndex);
+            yield this.snapshot;
+        } else {
+            let indices = this.split(firstIndex, lastIndex);
+            let firstIndexA = indices[0];
+            let secondIndexA = indices[1];
+            let firstIndexB = indices[2];
+            let secondIndexB = indices[3];
+
+            yield * this.mergeSort(firstIndexA, secondIndexA);
+            yield * this.mergeSort(firstIndexB, secondIndexB);
+
+            this.snapshot.selection.clear();
+            this.snapshot.select(firstIndex, lastIndex);
+            let mergedList = this.merge(firstIndexA, secondIndexA, firstIndexB, secondIndexB);
+
+            for (let i = 0; i < mergedList.length(); i++) {
+                list.set(mergedList.get(i), i + firstIndex);
+                yield this.snapshot
+            }
+        }
+    }
+
+    *sort() {
+        yield * this.mergeSort(0, this.snapshot.list.length() - 1);
+
+        this.snapshot.sorted = true;
+        this.snapshot.selection.clear();
+        yield this.snapshot;
+    }
+}
+
 let sorterAlgorithms = {
     "Bubble Sort": BubbleSorter,
     "Optimized Bubble Sort": OptimizedBubbleSorter,
     "Insertion Sort": InsertionSorter,
-    "Selection Sort": SelectionSorter
+    "Selection Sort": SelectionSorter,
+    "Merge Sort": SimplifiedMergeSorter,
+    "Crazy Merge Sort": MergeSorter
 }
 
 /**
