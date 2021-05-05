@@ -135,20 +135,41 @@ function createRangeList(length) {
 }
 
 /**
- * Creates a new list with values from 1 to <length>,
+ * Creates a new list with values from 1 to <length> inclusive,
  * in random order.
  *
  * @param length  the length of the list
  * @returns {List}
  */
 function createScrambledRangeList(length) {
-    let list = createRangeList(length);
-    let randomTimes = length * Math.log2(length);
+    /*
+     * This new algorithm for range list scrambling should be much faster
+     * than the previous algorithm. Rather than doing swaps, we use a
+     * randomized algorithm that builds a list from an ever decreasing
+     * range of values. It has much better performance than some of the
+     * previous algorithms, one of which required around O(n^2) performance.
+     */
+    let start = 1, end = length;
+    let list = new List();
+    let map = {};
 
-    let i;
-    for (i = 0; i < randomTimes; i++) {
-        randomSwap(list);
+    while (start !== end) {
+        let value = Math.floor(Math.random() * (end - start + 1)) + start;
+        if (!(value in map)) {
+            map[value] = true;
+            list.add(value);
+
+            // decrease the range from where we get our values if
+            // either of the ends is already in the range until
+            // the range does not contain either endpoint
+            while (start in map) start++;
+            while (end in map) end--;
+        }
     }
+
+    // include the last value at the endpoint when range has been compressed
+    // to a single value
+    list.add(start);
 
     return list;
 }
