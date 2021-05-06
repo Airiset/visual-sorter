@@ -1,4 +1,6 @@
-let selectionDialog = document.getElementById("algorithm-selector");
+/**
+ * This module contains all the menu interaction functionality.
+ */
 
 /**
  * Adds algorithm name as options on the given selection dialog.
@@ -34,4 +36,56 @@ function getSelectedAlgorithmName() {
     return selectionDialog.options[index].label;
 }
 
+/**
+ * Sets default attributes for given input size number dialog
+ * @param inputSizeDialog
+ */
+function setDefaultListSizeDialog(inputSizeDialog) {
+    inputSizeDialog.min = 1
+    inputSizeDialog.max = 2500
+    inputSizeDialog.value = 10
+    inputSizeDialog.oninput = function () {
+        if (parseInt(this.max) < parseInt(this.value)) {
+            this.value = this.min;
+        }
+
+        if (parseInt(this.min) > parseInt(this.value)) {
+            this.value = this.max;
+        }
+    }
+
+    inputSizeDialog.onchange = inputSizeDialog.oninput
+}
+
+/**
+ * Returns the list size value from the list size dialog.
+ */
+function getListSize() {
+    return parseInt(listInputSizeDialog.value);
+}
+
+/**
+ * Sets default attributes for given input size number dialog
+ * @param delayDialog
+ */
+function setDefaultDelayDialog(delayDialog) {
+    delayDialog.min = 10;
+    delayDialog.max = 500;
+    delayDialog.value = 50;
+}
+
+/**
+ * Returns the delay value from the delay range dialog.
+ */
+function getDelay() {
+    return parseInt(delayRangeDialog.value);
+}
+
+let selectionDialog = document.getElementById("algorithm-selector");
 addAlgorithmOptions(selectionDialog);
+
+let listInputSizeDialog = document.getElementById("list-size-input-field");
+setDefaultListSizeDialog(listInputSizeDialog);
+
+let delayRangeDialog = document.getElementById("delay-range-field");
+setDefaultDelayDialog(delayRangeDialog);

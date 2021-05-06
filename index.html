@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Visual Sorter v0.3</title>
+    <title>Visual Sorter v0.6</title>
     <link rel="stylesheet" type="text/css" href="styles/index.css" media="screen"/>
 </head>
 <body>
@@ -17,7 +17,16 @@
             <h1 id="app-header-title">Visual Sorter</h1>
         </div>
         <div class="menu-stack">
-            <label for="algorithm-selector"></label><select name="Algorithm" id="algorithm-selector"></select>
+            <label for="algorithm-selector">Algorithm  </label>
+            <select name="Algorithm" id="algorithm-selector"></select>
+        </div>
+        <div class="menu-stack">
+            <label for="list-size-input-field">List Size  </label>
+            <input type="number" id="list-size-input-field">
+        </div>
+        <div class="menu-stack">
+            <label for="delay-range-field">Delay  </label>
+            <input type="range" id="delay-range-field">
         </div>
         <div class="menu-stack">
             <button type="button" name="start-sorting-button" id="big-sort-button">Sort !!</button>
