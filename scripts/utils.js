@@ -207,6 +207,21 @@ function createScrambledRangeList(length) {
     return list;
 }
 
+listCreators = {
+    "Shuffled Range List": createScrambledRangeList,
+    "Descending Range List": createReversedRangeList,
+    "Ascending Range List": createRangeList,
+    "Random List": createRandomList
+}
+
+function getListTypeNames() {
+    return Object.keys(listCreators);
+}
+
+function getListCreatorFunction(listTypeName) {
+    return listCreators[listTypeName];
+}
+
 /**
  * Swaps values at indices <indexI> and <indexJ>.
  * @param list  the list to be mutated
