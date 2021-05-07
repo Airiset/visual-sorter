@@ -150,6 +150,24 @@ function createRangeList(length) {
 }
 
 /**
+ * Creates a new list with values from 1 to <length>, in reverse
+ * order.
+ *
+ * @param length  the length of the list
+ * @returns {List}
+ */
+function createReversedRangeList(length) {
+    let list = new List();
+
+    let i;
+    for (i = length; i > 0; i--) {
+        list.add(i - 1);
+    }
+
+    return list;
+}
+
+/**
  * Creates a new list with values from 1 to <length> inclusive,
  * in random order.
  *
