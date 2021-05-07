@@ -37,6 +37,39 @@ function getSelectedAlgorithmName() {
 }
 
 /**
+ * Adds list types as options on the given selection dialog.
+ * @param listTypeDialog  the HTML DOM object representing the
+ *                         selection dialog
+ */
+function addListTypeOptions(listTypeDialog) {
+    let listTypeNames = getListTypeNames();
+
+    for (let i = 0; i < listTypeNames.length; i++) {
+        let optionObject = document.createElement("OPTION");
+        let listType = listTypeNames[i];
+
+        // set default creator to be the first in the list
+        if (i === 0) {
+            optionObject.selected = true;
+        }
+
+        optionObject.label = listType;
+        optionObject.value = listType;
+
+        listTypeDialog.add(optionObject);
+    }
+}
+
+/**
+ * Return the name ID of the currently selected algorithm.
+ * @returns {string}
+ */
+function getSelectedListType() {
+    let index = listTypeSelectionDialog.selectedIndex;
+    return listTypeSelectionDialog.options[index].label;
+}
+
+/**
  * Sets default attributes for given input size number dialog
  * @param inputSizeDialog
  */
@@ -82,6 +115,9 @@ function getDelay() {
 }
 
 let selectionDialog = document.getElementById("algorithm-selector");
+let listTypeSelectionDialog = document.getElementById("list-type-selector");
+
+addListTypeOptions(listTypeSelectionDialog);
 addAlgorithmOptions(selectionDialog);
 
 let listInputSizeDialog = document.getElementById("list-size-input-field");
