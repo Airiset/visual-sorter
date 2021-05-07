@@ -449,13 +449,108 @@ class SimplifiedMergeSorter extends MergeSorter {
     }
 }
 
+/**
+ * A sorter class that implements the classic in-place Quicksort algorithm.
+ */
+class QuickSorter extends Sorter {
+    constructor(list) {
+        super(list);
+        this.recursiveStepCalled = false;
+    }
+
+    /**
+     * Returns the index for the pivot around which the sublist contained
+     * between indices firstIndex and lastIndex will be partitioned.
+     * @param firstIndex
+     * @param lastIndex
+     * @returns {number}
+     */
+    getPivotIndex(firstIndex, lastIndex) {
+        return Math.floor((firstIndex + lastIndex) / 2);
+    }
+
+    /**
+     * Generates a snapshot generator that partitions the sublist contained
+     * between indices firstIndex and lastIndex. The left sublist contains
+     * all elements less than the pivot, the right partition all items greater
+     * than or equal to the pivot. Returns the index where both lists are split.
+     * The classic partition algorithm is the one developed by Tony Hoare.
+     *
+     * @param firstIndex  the first index of the range
+     * @param lastIndex  the last index of the range
+     */
+    *partition(firstIndex, lastIndex) {
+        let pivotIndex = this.getPivotIndex(firstIndex, lastIndex);
+        let pivot = this.snapshot.list.get(pivotIndex);
+
+        let i = firstIndex - 1;
+        let j = lastIndex + 1;
+
+        this.snapshot.selection.clear();
+        this.snapshot.special.clear();
+
+        this.snapshot.select(firstIndex, lastIndex);
+
+        while (true) {
+
+            // find index of first item less than pivot
+            do {
+                this.snapshot.special.removeAll(i);
+                i++;
+                this.snapshot.special.add(i);
+                yield this.snapshot;
+            } while (this.snapshot.list.get(i) < pivot);
+
+            // find index of item greater than pivot
+            do {
+                this.snapshot.special.removeAll(j);
+                j--;
+                this.snapshot.special.add(j);
+                yield this.snapshot;
+            } while (this.snapshot.list.get(j) > pivot);
+
+            if (i >= j) {
+                return j;
+            }
+
+            this.snapshot.swapped.add(i);
+            this.snapshot.swapped.add(j);
+
+            yield this.snapshot;
+            swap(this.snapshot.list, i, j);
+            yield this.snapshot;
+
+            this.snapshot.swapped.clear();
+        }
+    }
+
+    *sort(firstIndex = 0, lastIndex = (this.snapshot.list.length() - 1)) {
+        let isChild = this.recursiveStepCalled;
+
+        if (firstIndex < lastIndex) {
+            let splitIndex = yield* this.partition(firstIndex, lastIndex);
+
+            this.recursiveStepCalled = true;
+            yield* this.sort(firstIndex, splitIndex);
+            yield* this.sort(splitIndex + 1, lastIndex);
+        }
+
+        if (!isChild) {
+            this.snapshot.sorted = true;
+            this.snapshot.selection.clear();
+            this.snapshot.special.clear()
+            yield this.snapshot;
+        }
+    }
+}
+
 let sorterAlgorithms = {
     "Bubble Sort": BubbleSorter,
     "Optimized Bubble Sort": OptimizedBubbleSorter,
     "Insertion Sort": InsertionSorter,
     "Selection Sort": SelectionSorter,
     "Merge Sort": SimplifiedMergeSorter,
-    "Crazy Merge Sort": MergeSorter
+    "Quicksort": QuickSorter
 }
 
 /**
