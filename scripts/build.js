@@ -45,112 +45,10 @@ function setCanvasSizeToContainer(canvas) {
     canvas.height = canvas.offsetHeight;
 }
 
-/**
- * Draws a blue rectangle on canvas.
- * @param canvas  the canvas
- * @param startX  the starting horizontal position
- * @param startY  the starting vertical position
- * @param width  the width of the rectangle
- * @param height  the height of the rectangle
- */
-function drawRectangle(canvas, startX, startY, width, height) {
-    let context = canvas.getContext('2d');
-    context.fillStyle = "blue";
-    context.fillRect(startX, startY, width, height);
-}
-
-/**
- * Draws a rectangle on canvas.
- * @param canvas  the canvas
- * @param startX  the starting horizontal position
- * @param startY  the starting vertical position
- * @param width  the width of the rectangle
- * @param height  the height of the rectangle
- * @param color  the color of the rectangle
- */
-function drawRectangleWithColor(canvas, startX, startY, width, height, color) {
-    let context = canvas.getContext('2d');
-    context.fillStyle = color;
-    context.fillRect(startX, startY, width, height);
-}
-
-/**
- * Colour whole canvas.
- * @param canvas  the canvas
- * @param colour  the colour
- */
-function colorWholeCanvas(canvas, colour) {
-    let context = canvas.getContext('2d');
-    context.fillStyle = colour;
-    context.fillRect(startX, startY, canvas.width, canvas.height);
-}
-
-/**
- * Clear the canvas.
- * @param canvas  the canvas
- */
-function clear(canvas) {
-    let context = canvas.getContext('2d');
-    context.clearRect(0,0, canvas.width, canvas.height);
-}
-
-/**
- * Draw a list of numbers using rectangles.
- * @param canvas  the canvas
- * @param list  the list of numbers
- * @param maxValue  the maximum value in the list
- */
-function drawNumberList(canvas, list, maxValue) {
-    let unitHeight = canvas.height / maxValue;
-    let unitWidth = canvas.width / (list.length() * 1.2);
-
-    let i;
-    for (i = 0; i < list.length(); i++) {
-        drawRectangle(
-            canvas,
-             (i + 1) * unitWidth,
-            0,
-            unitWidth,
-            unitHeight * list.get(i)
-        );
-    }
-}
-
-/**
- * Draw a sort snapshot.
- * @param canvas  the canvas
- * @param snapshot  the sort snapshot
- * @param maxValue  the max value in the list in sort snapshot
- */
-function drawSnapshot(canvas, snapshot, maxValue) {
-    let unitHeight = canvas.height / maxValue
-    let unitWidth = canvas.width / snapshot.list.length();
-
-    let i;
-    for (i = 0; i < snapshot.list.length(); i++) {
-        let color = "white";
-        if (snapshot.swapped.contains(i)) {
-            color = "green";
-        } else if (snapshot.special.contains(i)) {
-            color = "yellow";
-        } else if (snapshot.selection.contains(i)) {
-            color = "red";
-        } else {
-            color = "blue";
-        }
-
-        let xPosition = i * unitWidth;
-        let yPosition = unitHeight * (maxValue - snapshot.list.get(i));
-        let height = unitHeight * snapshot.list.get(i);
-        let width = unitWidth;
-
-        drawRectangleWithColor(canvas, xPosition, yPosition, width, height, color);
-    }
-}
-
 function beginSort(sorter, maxValue) {
     let begun = false, sort;
     let snapshot = sorter.snapshot;
+    let multipleSnapshots = null;
 
     currentAnimationInterval = window.setInterval(function () {
         clear(canvas);
@@ -159,15 +57,28 @@ function beginSort(sorter, maxValue) {
             sort = sorter.sort();
             begun = true;
         } else {
-            snapshot = sort.next().value;
+            let ret = sort.next().value;
+            if (Array.isArray(ret)) {
+                partitions = splitPartitionHorizontally(partition, ret.length);
+                multipleSnapshots = ret;
+            } else {
+                partitions = splitPartitionHorizontally(partition, 1);
+                multipleSnapshots = null;
+                snapshot = ret;
+            }
         }
-
-        drawSnapshot(canvas, snapshot, maxValue);
+        if (multipleSnapshots != null) {
+            for (let i = 0; i < partitions.length(); i++) {
+                drawSnapshotOnPartition(partitions.get(i), multipleSnapshots[i], maxValue);
+            }
+        } else {
+            drawSnapshotOnPartition(partition, snapshot, maxValue)
+        }
 
         if (snapshot.sorted) {
             clearInterval(currentAnimationInterval);
         }
-    }, 10);
+    }, getDelay());
 }
 
 /*
@@ -175,15 +86,21 @@ function beginSort(sorter, maxValue) {
  */
 
 let canvas = initializeCanvas();
-let startButton = initializeStartSortingButton();
-
-
 setCanvasSizeToContainer(canvas);
 
+let partition = new Partition(canvas);
+let partitions = splitPartitionHorizontally(partition, 1);
+
+let startButton = initializeStartSortingButton();
+
 startButton.onclick = function () {
-    let maxValue = 50;
-    let list = createScrambledRangeList(maxValue);
+    let maxValue = getListSize();
+
     let sortName = getSelectedAlgorithmName();
+    let listType = getSelectedListType();
+
+    let createList = getListCreatorFunction(listType);
+    let list = createList(maxValue);
 
     let sorter = createSort(list, sortName);
 
