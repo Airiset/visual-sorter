@@ -82,6 +82,21 @@ class List {
     }
 
     /**
+     * Removes all occurrences of <element> in the list
+     * @param element  the element to be removed
+     */
+    removeAll(element) {
+        let newElements = [];
+
+        for (let i = 0; i < this.length(); i++) {
+            let item = this.elements[i];
+            if (item !== element) newElements.push(item);
+        }
+
+        this.elements = newElements;
+    }
+
+    /**
      * Empties the list.
      */
     clear() {
