@@ -356,19 +356,32 @@ class SimplifiedMergeSorter extends MergeSorter {
      * @param firstIndexB  the first index for the range of the second list
      * @param secondIndexB  the last index for the range of the second lst
      */
-    merge(firstIndexA, secondIndexA, firstIndexB, secondIndexB) {
+    *merge(firstIndexA, secondIndexA, firstIndexB, secondIndexB) {
         let mergedList = new List();
         let list = this.snapshot.list;
 
         let indexA = firstIndexA, indexB = firstIndexB;
+
+        this.snapshot.special.add(indexA);
+        this.snapshot.special.add(indexB);
+        yield this.snapshot;
+
         while (secondIndexA - indexA >= 0 && secondIndexB - indexB >= 0) {
             if (list.get(indexA) <= list.get(indexB)) {
                 mergedList.add(list.get(indexA));
                 indexA++;
+
+                this.snapshot.special.clear();
+                this.snapshot.special.add(indexA);
             } else {
                 mergedList.add(list.get(indexB));
                 indexB++;
+
+                this.snapshot.special.clear();
+                this.snapshot.special.add(indexB);
             }
+
+            yield this.snapshot;
         }
 
         let remainingList, index, finalIndex;
@@ -385,6 +398,10 @@ class SimplifiedMergeSorter extends MergeSorter {
         while (finalIndex - index >= 0) {
             mergedList.add(remainingList.get(index));
             index++;
+
+            this.snapshot.special.clear();
+            this.snapshot.special.add(index);
+            yield this.snapshot;
         }
 
         return mergedList;
@@ -429,13 +446,14 @@ class SimplifiedMergeSorter extends MergeSorter {
             yield * this.mergeSort(firstIndexA, secondIndexA);
             yield * this.mergeSort(firstIndexB, secondIndexB);
 
+            this.snapshot.special.clear();
             this.snapshot.selection.clear();
             this.snapshot.select(firstIndex, lastIndex);
-            let mergedList = this.merge(firstIndexA, secondIndexA, firstIndexB, secondIndexB);
+            let mergedList = yield * this.merge(firstIndexA, secondIndexA, firstIndexB, secondIndexB);
 
             for (let i = 0; i < mergedList.length(); i++) {
                 list.set(mergedList.get(i), i + firstIndex);
-                yield this.snapshot
+                yield this.snapshot;
             }
         }
     }
@@ -445,6 +463,7 @@ class SimplifiedMergeSorter extends MergeSorter {
 
         this.snapshot.sorted = true;
         this.snapshot.selection.clear();
+        this.snapshot.special.clear();
         yield this.snapshot;
     }
 }
