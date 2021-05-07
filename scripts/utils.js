@@ -121,6 +121,10 @@ class List {
  * @returns {List}
  */
 function createRandomList(length, maxValue) {
+    if (maxValue === undefined) {
+        maxValue = length;
+    }
+
     let list = new List();
     let round = Math.round;
     let random = Math.random;
