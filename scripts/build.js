@@ -5,7 +5,7 @@
 const startX = 0;
 const startY = 0;
 
-let currentAnimationInterval = [];
+const animationIdentifiers = [];
 
 /**
  * Returns the canvas element.
@@ -54,9 +54,23 @@ function beginSort(sorter, maxValue, partition) {
     let snapshot = sorter.snapshot;
     let multipleSnapshots = null;
     let partitions = new List();
+    let currentStart;
 
-    let thisInterval = window.setInterval(function () {
-        clearPartitions(partitions);
+    let visualizeStep = function (timestamp) {
+        if (currentStart === undefined) {
+            currentStart = timestamp;
+        }
+
+        const elapsed = timestamp - currentStart;
+
+        if (elapsed < getDelay()) {
+            animationIdentifiers.push(requestAnimationFrame(visualizeStep));
+            return;
+        }
+
+        currentStart = timestamp;
+
+        clear(canvas);
 
         if (!begun) {
             sort = sorter.sort();
@@ -72,6 +86,7 @@ function beginSort(sorter, maxValue, partition) {
                 snapshot = ret;
             }
         }
+
         if (multipleSnapshots != null) {
             for (let i = 0; i < partitions.length(); i++) {
                 drawSnapshotOnPartition(partitions.get(i), multipleSnapshots[i], maxValue);
@@ -80,12 +95,12 @@ function beginSort(sorter, maxValue, partition) {
             drawSnapshotOnPartition(partition, snapshot, maxValue)
         }
 
-        if (snapshot.sorted) {
-            clearInterval(thisInterval);
+        if (!snapshot.sorted) {
+            animationIdentifiers.push(requestAnimationFrame(visualizeStep));
         }
-    }, getDelay());
+    };
 
-    currentAnimationInterval.push(thisInterval);
+    animationIdentifiers.push(requestAnimationFrame(visualizeStep));
 }
 
 /*
@@ -111,7 +126,7 @@ startButton.onclick = function () {
 
     let sorter = createSort(list, sortName);
 
-    clearAll(currentAnimationInterval);
+    stopAnimations(animationIdentifiers);
     beginSort(sorter, maxValue, partition);
 }
 
@@ -130,13 +145,13 @@ compareButton.onclick = function () {
 
     let partitions = splitPartitionHorizontally(partition, 2);
 
-    clearAll(currentAnimationInterval);
+    stopAnimations(animationIdentifiers);
     beginSort(firstSorter, maxValue, partitions.get(0));
     beginSort(secondSorter, maxValue, partitions.get(1));
 }
 
-function clearAll(animationIntervals) {
-    for (let i = 0; i < animationIntervals.length; i++) {
-        clearInterval(animationIntervals.pop());
+function stopAnimations(animationFrameIdentifiers) {
+    while (animationFrameIdentifiers.length > 0) {
+        cancelAnimationFrame(animationFrameIdentifiers.pop());
     }
 }
