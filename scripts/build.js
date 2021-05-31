@@ -5,7 +5,7 @@
 const startX = 0;
 const startY = 0;
 
-let currentAnimationInterval;
+let currentAnimation;
 
 /**
  * Returns the canvas element.
@@ -49,8 +49,22 @@ function beginSort(sorter, maxValue) {
     let begun = false, sort;
     let snapshot = sorter.snapshot;
     let multipleSnapshots = null;
+    let currentStart;
 
-    currentAnimationInterval = window.setInterval(function () {
+    let visualizeStep = function (timestamp) {
+        if (currentStart === undefined) {
+            currentStart = timestamp;
+        }
+
+        const elapsed = timestamp - currentStart;
+
+        if (elapsed < getDelay()) {
+            currentAnimation = requestAnimationFrame(visualizeStep);
+            return;
+        }
+
+        currentStart = timestamp;
+
         clear(canvas);
 
         if (!begun) {
@@ -67,6 +81,7 @@ function beginSort(sorter, maxValue) {
                 snapshot = ret;
             }
         }
+
         if (multipleSnapshots != null) {
             for (let i = 0; i < partitions.length(); i++) {
                 drawSnapshotOnPartition(partitions.get(i), multipleSnapshots[i], maxValue);
@@ -75,10 +90,12 @@ function beginSort(sorter, maxValue) {
             drawSnapshotOnPartition(partition, snapshot, maxValue)
         }
 
-        if (snapshot.sorted) {
-            clearInterval(currentAnimationInterval);
+        if (!snapshot.sorted) {
+            currentAnimation = requestAnimationFrame(visualizeStep);
         }
-    }, getDelay());
+    };
+
+    currentAnimation = requestAnimationFrame(visualizeStep)
 }
 
 /*
@@ -104,6 +121,6 @@ startButton.onclick = function () {
 
     let sorter = createSort(list, sortName);
 
-    clearInterval(currentAnimationInterval);
+    cancelAnimationFrame(currentAnimation);
     beginSort(sorter, maxValue);
 }
