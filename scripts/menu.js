@@ -102,16 +102,17 @@ function getListSize(listInputSizeDialog) {
  * @param delayDialog
  */
 function setDefaultDelayDialog(delayDialog) {
-    delayDialog.min = 10;
-    delayDialog.max = 500;
-    delayDialog.value = 50;
+    delayDialog.min = 1;
+    delayDialog.max = 16;
+    delayDialog.value = 8;
 }
 
 /**
  * Returns the delay value from the delay range dialog.
  */
 function getDelayRegular() {
-    return parseInt(delayRangeDialog.value);
+    let value = parseInt(delayRangeDialog.value);
+    return Math.pow(value, 2);
 }
 
 function getDelayCompare() {
