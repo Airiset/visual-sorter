@@ -44,7 +44,7 @@ function colorWholeCanvas(canvas, colour) {
  */
 function clear(canvas) {
     let context = canvas.getContext('2d');
-    context.clearRect(0,0, canvas.width, canvas.height);
+    context.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 /**
@@ -157,6 +157,19 @@ class Partition {
 
         return coordinatePair;
     }
+
+    /**
+     * Clears the canvas section of the partition.
+     */
+    clear() {
+        let context = this.canvas.getContext('2d');
+        context.clearRect(
+            this.startXCoordinate,
+            this.startYCoordinate,
+            this.width,
+            this.height
+        );
+    }
 }
 
 function splitPartitionVertically(partition, numberOfPartitions) {
@@ -213,4 +226,14 @@ function splitPartitionHorizontally(partition, numberOfPartitions) {
     }
 
     return newPartitions;
+}
+
+/**
+ * Clear all partitions in the given list.
+ * @param partitions  the list of partitions
+ */
+function clearPartitions(partitions) {
+    for (let i = 0; i < partitions.length(); i++) {
+        partitions.get(i).clear();
+    }
 }
