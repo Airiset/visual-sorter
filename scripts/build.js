@@ -5,7 +5,7 @@
 const startX = 0;
 const startY = 0;
 
-let currentAnimationInterval;
+let currentAnimationInterval = [];
 
 /**
  * Returns the canvas element.
@@ -17,6 +17,10 @@ function initializeCanvas() {
 
 function initializeStartSortingButton() {
     return document.getElementById("big-sort-button");
+}
+
+function initializeStartCompareButton() {
+    return document.getElementById("big-compare-button");
 }
 
 /**
@@ -45,13 +49,14 @@ function setCanvasSizeToContainer(canvas) {
     canvas.height = canvas.offsetHeight;
 }
 
-function beginSort(sorter, maxValue) {
+function beginSort(sorter, maxValue, partition) {
     let begun = false, sort;
     let snapshot = sorter.snapshot;
     let multipleSnapshots = null;
+    let partitions = new List();
 
-    currentAnimationInterval = window.setInterval(function () {
-        clear(canvas);
+    let thisInterval = window.setInterval(function () {
+        clearPartitions(partitions);
 
         if (!begun) {
             sort = sorter.sort();
@@ -76,9 +81,11 @@ function beginSort(sorter, maxValue) {
         }
 
         if (snapshot.sorted) {
-            clearInterval(currentAnimationInterval);
+            clearInterval(thisInterval);
         }
     }, getDelay());
+
+    currentAnimationInterval.push(thisInterval);
 }
 
 /*
@@ -89,21 +96,47 @@ let canvas = initializeCanvas();
 setCanvasSizeToContainer(canvas);
 
 let partition = new Partition(canvas);
-let partitions = splitPartitionHorizontally(partition, 1);
 
 let startButton = initializeStartSortingButton();
+let compareButton = initializeStartCompareButton();
 
 startButton.onclick = function () {
-    let maxValue = getListSize();
+    let maxValue = getListSize(listInputSizeDialog);
 
-    let sortName = getSelectedAlgorithmName();
-    let listType = getSelectedListType();
+    let sortName = getSelectedAlgorithmName(selectionDialog);
+    let listType = getSelectedListType(listTypeSelectionDialog);
 
     let createList = getListCreatorFunction(listType);
     let list = createList(maxValue);
 
     let sorter = createSort(list, sortName);
 
-    clearInterval(currentAnimationInterval);
-    beginSort(sorter, maxValue);
+    clearAll(currentAnimationInterval);
+    beginSort(sorter, maxValue, partition);
+}
+
+compareButton.onclick = function () {
+    let maxValue = getListSize(listInputSizeDialogCompare);
+
+    let sortNameFirst = getSelectedAlgorithmName(selectionDialogCompareFirst);
+    let sortNameSecond = getSelectedAlgorithmName(selectionDialogCompareSecond);
+    let listType = getSelectedListType(listTypeSelectionDialogCompare);
+
+    let createList = getListCreatorFunction(listType);
+    let list = createList(maxValue);
+
+    let firstSorter = createSort(copyList(list), sortNameFirst);
+    let secondSorter = createSort(copyList(list), sortNameSecond);
+
+    let partitions = splitPartitionHorizontally(partition, 2);
+
+    clearAll(currentAnimationInterval);
+    beginSort(firstSorter, maxValue, partitions.get(0));
+    beginSort(secondSorter, maxValue, partitions.get(1));
+}
+
+function clearAll(animationIntervals) {
+    for (let i = 0; i < animationIntervals.length; i++) {
+        clearInterval(animationIntervals.pop());
+    }
 }

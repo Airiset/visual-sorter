@@ -12,9 +12,42 @@
         </canvas>
     </div>
 
+    <div id="compare-menu-container">
+        <div class="menu-stack">
+            <h1 class="app-header-title">Visual Sorter</h1>
+        </div>
+        <div class="menu-stack">
+            <label for="algorithm-selector-compare-1">First Algorithm  </label>
+            <select name="Algorithm" id="algorithm-selector-compare-1"></select>
+        </div>
+        <div class="menu-stack">
+            <label for="algorithm-selector-compare-2">Second Algorithm  </label>
+            <select name="Algorithm" id="algorithm-selector-compare-2"></select>
+        </div>
+        <div class="menu-stack">
+            <label for="list-type-selector-compare">List Type  </label>
+            <select name="List Type" id="list-type-selector-compare"></select>
+        </div>
+        <div class="menu-stack">
+            <label for="list-size-input-field-compare">List Size  </label>
+            <input type="number" id="list-size-input-field-compare">
+        </div>
+        <div class="menu-stack">
+            <label for="delay-range-field-compare">Delay  </label>
+            <input type="range" id="delay-range-field-compare">
+        </div>
+        <div class="menu-stack">
+            <button type="button" name="start-sorting-button" class="big-button" id="big-compare-button">Compare !!</button>
+        </div>
+        <div class="menu-stack" onclick="showRegularMenu()">
+            <button class="somewhat-big-button">
+                Toggle
+            </button>
+        </div>
+    </div>
     <div id="menu-container">
         <div class="menu-stack">
-            <h1 id="app-header-title">Visual Sorter</h1>
+            <h1 class="app-header-title">Visual Sorter</h1>
         </div>
         <div class="menu-stack">
             <label for="algorithm-selector">Algorithm  </label>
@@ -33,7 +66,12 @@
             <input type="range" id="delay-range-field">
         </div>
         <div class="menu-stack">
-            <button type="button" name="start-sorting-button" id="big-sort-button">Sort !!</button>
+            <button type="button" name="start-sorting-button" class="big-button" id="big-sort-button">Sort !!</button>
+        </div>
+        <div class="menu-stack" onclick="showCompareMenu()">
+            <button class="somewhat-big-button">
+                Toggle
+            </button>
         </div>
     </div>
 
