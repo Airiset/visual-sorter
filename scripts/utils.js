@@ -259,6 +259,24 @@ function randomSwap(list) {
 }
 
 /**
+ * Returns a soft copy of the given list. All elements in the
+ * new list have the same references to the corresponding
+ * element in the given list. However, both lists objects are
+ * stored as different references.
+ *
+ * @param list  the list to copy
+ * @returns {List}  a new list with the same elements but
+ *                  different reference
+ */
+function copyList(list) {
+    let newList = new List();
+    for (let i = 0; i < list.length(); i++) {
+        newList.add(list.get(i));
+    }
+    return newList;
+}
+
+/**
  * A prototype for a two pointer Node
  */
 class Node {
