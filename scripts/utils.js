@@ -35,8 +35,12 @@ class Snapshot {
  * A prototype for a List.
  */
 class List {
-    constructor() {
-        this.elements = [];
+    constructor(elements) {
+        if (elements === undefined) {
+            this.elements = [];
+        } else {
+            this.elements = elements;
+        }
     }
 
     /**
