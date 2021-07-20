@@ -20,9 +20,23 @@ body {
     text-align: center;
     margin-left: auto;
     margin-right: auto;
+    position: relative;
+    z-index: 1;
 }
 
-#big-sort-button {
+#compare-menu-container {
+    width: 30%;
+    height: 100vh;
+    background-color: white;
+    float: left;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    z-index: 2;
+}
+
+.big-button {
     width: 65%;
     height: 100%;
     border-radius: 30px;
@@ -38,7 +52,7 @@ body {
     outline: none;
 }
 
-#big-sort-button:hover {
+.big-button:hover {
     width: 65%;
     height: 100%;
     border-radius: 30px;
@@ -56,7 +70,7 @@ body {
     outline: none;
 }
 
-#big-sort-button:active {
+.big-button:active {
     width: 65%;
     height: 100%;
     border-radius: 30px;
@@ -72,7 +86,7 @@ body {
     outline: none;
 }
 
-#app-header-title {
+.app-header-title {
     font-size: 32pt;
     font-family:  Calibri, sans-serif;
     color: orange;
@@ -81,4 +95,54 @@ body {
 .menu-stack {
     display: block;
     height: 10%;
+}
+
+.somewhat-big-button {
+    width: 45%;
+    height: 100%;
+    border-radius: 30px;
+    border-style: none;
+
+    color: white;
+    background-color: darkgray;
+
+    font-size: 14pt;
+    font-weight: bold;
+    font-family: Calibri, serif;
+
+    outline: none;
+}
+
+.somewhat-big-button:hover {
+    width: 45%;
+    height: 100%;
+    border-radius: 30px;
+    border-style: double;
+    border-color: darkgray;
+    border-width: thick;
+
+    color: darkgray;
+    background-color: white;
+
+    font-size: 20pt;
+    font-weight: bold;
+    font-family: Calibri, serif;
+
+    outline: none;
+}
+
+.somewhat-big-button:active {
+    width: 45%;
+    height: 100%;
+    border-radius: 30px;
+    border-style: none;
+
+    color: white;
+    background-color: darkgray;
+
+    font-size: 18pt;
+    font-weight: bold;
+    font-family: Calibri, serif;
+
+    outline: none;
 }

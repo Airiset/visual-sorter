@@ -5,7 +5,7 @@
 const startX = 0;
 const startY = 0;
 
-let currentAnimationInterval;
+const animationIdentifiers = [];
 
 /**
  * Returns the canvas element.
@@ -17,6 +17,10 @@ function initializeCanvas() {
 
 function initializeStartSortingButton() {
     return document.getElementById("big-sort-button");
+}
+
+function initializeStartCompareButton() {
+    return document.getElementById("big-compare-button");
 }
 
 /**
@@ -45,13 +49,28 @@ function setCanvasSizeToContainer(canvas) {
     canvas.height = canvas.offsetHeight;
 }
 
-function beginSort(sorter, maxValue) {
+function beginSort(sorter, maxValue, partition) {
     let begun = false, sort;
     let snapshot = sorter.snapshot;
     let multipleSnapshots = null;
+    let partitions = new List();
+    let currentStart;
 
-    currentAnimationInterval = window.setInterval(function () {
-        clear(canvas);
+    let visualizeStep = function (timestamp) {
+        if (currentStart === undefined) {
+            currentStart = timestamp;
+        }
+
+        const elapsed = timestamp - currentStart;
+
+        if (elapsed < getDelay()) {
+            animationIdentifiers.push(requestAnimationFrame(visualizeStep));
+            return;
+        }
+
+        currentStart = timestamp;
+
+        clearPartitions(partitions);
 
         if (!begun) {
             sort = sorter.sort();
@@ -67,6 +86,7 @@ function beginSort(sorter, maxValue) {
                 snapshot = ret;
             }
         }
+
         if (multipleSnapshots != null) {
             for (let i = 0; i < partitions.length(); i++) {
                 drawSnapshotOnPartition(partitions.get(i), multipleSnapshots[i], maxValue);
@@ -75,10 +95,12 @@ function beginSort(sorter, maxValue) {
             drawSnapshotOnPartition(partition, snapshot, maxValue)
         }
 
-        if (snapshot.sorted) {
-            clearInterval(currentAnimationInterval);
+        if (!snapshot.sorted) {
+            animationIdentifiers.push(requestAnimationFrame(visualizeStep));
         }
-    }, getDelay());
+    };
+
+    animationIdentifiers.push(requestAnimationFrame(visualizeStep));
 }
 
 /*
@@ -89,21 +111,47 @@ let canvas = initializeCanvas();
 setCanvasSizeToContainer(canvas);
 
 let partition = new Partition(canvas);
-let partitions = splitPartitionHorizontally(partition, 1);
 
 let startButton = initializeStartSortingButton();
+let compareButton = initializeStartCompareButton();
 
 startButton.onclick = function () {
-    let maxValue = getListSize();
+    let maxValue = getListSize(listInputSizeDialog);
 
-    let sortName = getSelectedAlgorithmName();
-    let listType = getSelectedListType();
+    let sortName = getSelectedAlgorithmName(selectionDialog);
+    let listType = getSelectedListType(listTypeSelectionDialog);
 
     let createList = getListCreatorFunction(listType);
     let list = createList(maxValue);
 
     let sorter = createSort(list, sortName);
 
-    clearInterval(currentAnimationInterval);
-    beginSort(sorter, maxValue);
+    stopAnimations(animationIdentifiers);
+    beginSort(sorter, maxValue, partition);
+}
+
+compareButton.onclick = function () {
+    let maxValue = getListSize(listInputSizeDialogCompare);
+
+    let sortNameFirst = getSelectedAlgorithmName(selectionDialogCompareFirst);
+    let sortNameSecond = getSelectedAlgorithmName(selectionDialogCompareSecond);
+    let listType = getSelectedListType(listTypeSelectionDialogCompare);
+
+    let createList = getListCreatorFunction(listType);
+    let list = createList(maxValue);
+
+    let firstSorter = createSort(copyList(list), sortNameFirst);
+    let secondSorter = createSort(copyList(list), sortNameSecond);
+
+    let partitions = splitPartitionHorizontally(partition, 2);
+
+    stopAnimations(animationIdentifiers);
+    beginSort(firstSorter, maxValue, partitions.get(0));
+    beginSort(secondSorter, maxValue, partitions.get(1));
+}
+
+function stopAnimations(animationFrameIdentifiers) {
+    while (animationFrameIdentifiers.length > 0) {
+        cancelAnimationFrame(animationFrameIdentifiers.pop());
+    }
 }

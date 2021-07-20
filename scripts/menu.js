@@ -31,7 +31,7 @@ function addAlgorithmOptions(selectionDialog) {
  * Return the name ID of the currently selected algorithm.
  * @returns {string}
  */
-function getSelectedAlgorithmName() {
+function getSelectedAlgorithmName(selectionDialog) {
     let index = selectionDialog.selectedIndex;
     return selectionDialog.options[index].label;
 }
@@ -64,9 +64,9 @@ function addListTypeOptions(listTypeDialog) {
  * Return the name ID of the currently selected algorithm.
  * @returns {string}
  */
-function getSelectedListType() {
-    let index = listTypeSelectionDialog.selectedIndex;
-    return listTypeSelectionDialog.options[index].label;
+function getSelectedListType(listTypeDialog) {
+    let index = listTypeDialog.selectedIndex;
+    return listTypeDialog.options[index].label;
 }
 
 /**
@@ -93,7 +93,7 @@ function setDefaultListSizeDialog(inputSizeDialog) {
 /**
  * Returns the list size value from the list size dialog.
  */
-function getListSize() {
+function getListSize(listInputSizeDialog) {
     return parseInt(listInputSizeDialog.value);
 }
 
@@ -102,26 +102,60 @@ function getListSize() {
  * @param delayDialog
  */
 function setDefaultDelayDialog(delayDialog) {
-    delayDialog.min = 10;
-    delayDialog.max = 500;
-    delayDialog.value = 50;
+    delayDialog.min = 1;
+    delayDialog.max = 16;
+    delayDialog.value = 8;
 }
 
 /**
  * Returns the delay value from the delay range dialog.
  */
-function getDelay() {
-    return parseInt(delayRangeDialog.value);
+function getDelayRegular() {
+    let value = parseInt(delayRangeDialog.value);
+    return Math.pow(value, 2);
+}
+
+function getDelayCompare() {
+    return parseInt(delayRangeDialogCompare.value);
+}
+
+function showCompareMenu() {
+    menuContainer.hidden = true;
+    compareMenuContainer.hidden = false;
+    getDelay = getDelayCompare;
+}
+
+function showRegularMenu() {
+    menuContainer.hidden = false;
+    compareMenuContainer.hidden = true;
+    getDelay = getDelayRegular;
 }
 
 let selectionDialog = document.getElementById("algorithm-selector");
 let listTypeSelectionDialog = document.getElementById("list-type-selector");
+let listInputSizeDialog = document.getElementById("list-size-input-field");
+let delayRangeDialog = document.getElementById("delay-range-field");
 
 addListTypeOptions(listTypeSelectionDialog);
 addAlgorithmOptions(selectionDialog);
-
-let listInputSizeDialog = document.getElementById("list-size-input-field");
 setDefaultListSizeDialog(listInputSizeDialog);
-
-let delayRangeDialog = document.getElementById("delay-range-field");
 setDefaultDelayDialog(delayRangeDialog);
+
+const selectionDialogCompareFirst = document.getElementById("algorithm-selector-compare-1");
+const selectionDialogCompareSecond = document.getElementById("algorithm-selector-compare-2");
+const listTypeSelectionDialogCompare = document.getElementById("list-type-selector-compare");
+const listInputSizeDialogCompare = document.getElementById("list-size-input-field-compare");
+const delayRangeDialogCompare = document.getElementById("delay-range-field-compare");
+
+addListTypeOptions(listTypeSelectionDialogCompare);
+addAlgorithmOptions(selectionDialogCompareFirst);
+addAlgorithmOptions(selectionDialogCompareSecond);
+setDefaultListSizeDialog(listInputSizeDialogCompare);
+setDefaultDelayDialog(delayRangeDialogCompare);
+
+let menuContainer = document.getElementById("menu-container");
+let compareMenuContainer = document.getElementById("compare-menu-container");
+
+let getDelay;
+
+showRegularMenu();
