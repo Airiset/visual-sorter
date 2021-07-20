@@ -70,7 +70,7 @@ function beginSort(sorter, maxValue, partition) {
 
         currentStart = timestamp;
 
-        clear(canvas);
+        clearPartitions(partitions);
 
         if (!begun) {
             sort = sorter.sort();
